@@ -1,64 +1,75 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { Extra } from "./../../types/extra";
+import { Country } from "./../../types/country";
+import { Status } from "./../../types/";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-export const loadCountries = createAsyncThunk(
-  '@@countries/load-countries',
-  (_, {
-    extra: {client, api},
-  }) => {
-    return client.get(api.ALL_COUNTRIES)
+export const loadCountries = createAsyncThunk<
+  { data: Country[] },
+  undefined,
+  {
+    state: { countries: CountiesSlice };
+    extra: Extra;
+    rejectVlue: string;
+  }
+>(
+  "@@countries/load-countries",
+  async (_, { extra: { client, api }, rejectWithValue }) => {
+    try {
+      return client.get(api.ALL_COUNTRIES);
+    } catch (error) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message);
+      } else {
+        return rejectWithValue("unknown");
+      }
+    }
   },
   {
     condition: (_, { getState }) => {
-      const { countries: { status } } = getState();
+      const {
+        countries: { status },
+      } = getState();
 
-      if (status === 'loading') {
+      if (status === "loading") {
         return false;
       }
-    }
+    },
   }
 );
 
-const initialState = {
-  status: 'idle',
+type CountiesSlice = {
+  status: Status;
+  error: string | null;
+  list: Country[];
+};
+
+const initialState: CountiesSlice = {
+  status: "idle",
   error: null,
   list: [],
-}
+};
 
 const countrySlice = createSlice({
-  name: '@@countries',
+  name: "@@countries",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(loadCountries.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
         state.error = null;
       })
       .addCase(loadCountries.rejected, (state, action) => {
-        state.status = 'rejected';
-        state.error = action.payload || action.meta.error;
+        state.status = "rejected";
+        // state.error = action.payload || "cannot load data ";
       })
       .addCase(loadCountries.fulfilled, (state, action) => {
-        state.status = 'received';
+        state.status = "received";
         state.list = action.payload.data;
-      })
-  }
-})
+      });
+  },
+});
 
 export const countryReducer = countrySlice.reducer;
 
 // selectors
-export const selectCountriesInfo = (state) => ({
-  status: state.countries.status,
-  error: state.countries.error,
-  qty: state.countries.list.length
-})
-
-export const selectAllCountries = (state) => state.countries.list;
-export const selectVisibleCountries = (state, {search = '', region = ''}) => {
-  return state.countries.list.filter(
-    country => (
-      country.name.toLowerCase().includes(search.toLowerCase()) && country.region.includes(region)
-    )
-  )
-}

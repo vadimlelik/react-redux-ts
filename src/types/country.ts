@@ -16,7 +16,7 @@ export type Country = {
     name: string,
     nativeName: string,
     flag: string,
-    flags: [{ png: string, svg: string }],
+    flags: { png: string, svg: string },
     region: Region,
     subregion: string,
     capital: string,
@@ -25,5 +25,18 @@ export type Country = {
     borders: string[],
     currencies: Currency[],
     languages: Language[]
+
+}
+
+type Info = {
+    title: string,
+    description: string
+}
+
+
+export type CountryInfo = {
+    img: string,
+    name: string,
+    info: Info[]
 
 }

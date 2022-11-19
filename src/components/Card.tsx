@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import {CountryInfo} from "../types";
 
 const Wrapper = styled.article`
   border-radius: var(--radii);
@@ -43,20 +44,25 @@ const CardListItem = styled.li`
   }
 `;
 
-export const Card = ({ img, name, info = [], onClick }) => {
-  return (
-    <Wrapper onClick={onClick}>
-      <CardImage src={img} alt={name} />
-      <CardBody>
-        <CardTitle>{name}</CardTitle>
-        <CardList>
-          {info.map((el) => (
-            <CardListItem key={el.title}>
-              <b>{el.title}:</b> {el.description}
-            </CardListItem>
-          ))}
-        </CardList>
-      </CardBody>
-    </Wrapper>
-  );
+
+interface CardPropps extends CountryInfo {
+    onClick: () => void
+}
+
+export const Card = ({img, name, info = [], onClick}: CardPropps) => {
+    return (
+        <Wrapper onClick={onClick}>
+            <CardImage src={img} alt={name}/>
+            <CardBody>
+                <CardTitle>{name}</CardTitle>
+                <CardList>
+                    {info.map((el) => (
+                        <CardListItem key={el.title}>
+                            <b>{el.title}:</b> {el.description}
+                        </CardListItem>
+                    ))}
+                </CardList>
+            </CardBody>
+        </Wrapper>
+    );
 };
